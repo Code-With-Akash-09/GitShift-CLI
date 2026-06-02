@@ -11,8 +11,14 @@
     "start": "node src/server.js",
     "doctor": "node src/server.js doctor"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "git",
+    "github",
+    "cli",
+    "ssh",
+    "account-switcher"
+  ],
+  "author": "Akash Lakade",
   "license": "ISC",
   "type": "module",
   "dependencies": {
