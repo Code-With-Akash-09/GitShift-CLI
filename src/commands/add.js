@@ -20,80 +20,91 @@ import {
 } from "../utils/logger.js";
 
 export async function addCommand() {
-    const name = await input({
-        message: "Profile Name",
-    });
+    try {
+        const name = await input({
+            message: "Profile Name",
+        });
 
-    if (getProfile(name)) {
-        error(
-            `Profile "${name}" already exists`
-        );
-
-        process.exitCode = 1;
-        return;
-    }
-
-    const username = await input({
-        message: "GitHub Username",
-    });
-
-    const email = await input({
-        message: "Email",
-    });
-
-    const createSSH = await confirm({
-        message:
-            "Generate SSH key automatically?",
-        default: true,
-    });
-
-    let sshKey = null;
-
-    if (createSSH) {
-        const spinner = ora(
-            "Generating SSH key..."
-        ).start();
-
-        try {
-            sshKey = await generateSSHKey(
-                name,
-                email
-            );
-
-            spinner.succeed(
-                "SSH key generated"
-            );
-        } catch (err) {
-            spinner.fail(
-                "Unable to generate SSH key"
-            );
-
+        if (getProfile(name)) {
             error(
-                "Could not create SSH key. Ensure OpenSSH is installed and available."
+                `Profile "${name}" already exists`
             );
-
-            if (
-                err &&
-                typeof err === "object" &&
-                "shortMessage" in err &&
-                err.shortMessage
-            ) {
-                error(String(err.shortMessage));
-            }
 
             process.exitCode = 1;
             return;
         }
+
+        const username = await input({
+            message: "GitHub Username",
+        });
+
+        const email = await input({
+            message: "Email",
+        });
+
+        const createSSH = await confirm({
+            message:
+                "Generate SSH key automatically?",
+            default: true,
+        });
+
+        let sshKey = null;
+
+        if (createSSH) {
+            const spinner = ora(
+                "Generating SSH key..."
+            ).start();
+
+            try {
+                sshKey = await generateSSHKey(
+                    name,
+                    email
+                );
+
+                spinner.succeed(
+                    "SSH key generated"
+                );
+            } catch (err) {
+                spinner.fail(
+                    "Unable to generate SSH key"
+                );
+
+                error(
+                    "Could not create SSH key. Ensure OpenSSH is installed and available."
+                );
+
+                if (
+                    err &&
+                    typeof err === "object" &&
+                    "shortMessage" in err &&
+                    err.shortMessage
+                ) {
+                    error(String(err.shortMessage));
+                }
+
+                process.exitCode = 1;
+                return;
+            }
+        }
+
+        saveProfile({
+            name,
+            username,
+            email,
+            sshKey,
+        });
+
+        success(
+            `Profile "${name}" saved locally`
+        );
+    } catch (err) {
+        if (err && err.name === "ExitPromptError") {
+            // User canceled the prompt (Ctrl+C / SIGINT). Exit gracefully.
+            process.exitCode = 0;
+            return;
+        }
+
+        error(String(err));
+        process.exitCode = 1;
     }
-
-    saveProfile({
-        name,
-        username,
-        email,
-        sshKey,
-    });
-
-    success(
-        `Profile "${name}" saved locally`
-    );
 }
