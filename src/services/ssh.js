@@ -3,14 +3,28 @@ import fs from "fs-extra";
 import os from "os";
 import path from "path";
 
+function toSafeKeyName(profileName) {
+    const normalized = profileName
+        .trim()
+        .replace(/[^a-zA-Z0-9._-]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+
+    return normalized || "profile";
+}
+
 export async function generateSSHKey(
     profileName,
     email
 ) {
+    const safeProfileName = toSafeKeyName(
+        profileName
+    );
+
     const keyPath = path.join(
         os.homedir(),
         ".ssh",
-        `ghswitch-${profileName}`
+        `ghswitch-${safeProfileName}`
     );
 
     const exists = await fs.pathExists(
@@ -20,6 +34,10 @@ export async function generateSSHKey(
     if (exists) {
         return keyPath;
     }
+
+    await fs.ensureDir(
+        path.dirname(keyPath)
+    );
 
     await execa("ssh-keygen", [
         "-t",

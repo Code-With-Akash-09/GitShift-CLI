@@ -15,6 +15,7 @@ import {
 } from "../services/ssh.js";
 
 import {
+    error,
     success,
 } from "../utils/logger.js";
 
@@ -24,9 +25,12 @@ export async function addCommand() {
     });
 
     if (getProfile(name)) {
-        throw new Error(
+        error(
             `Profile "${name}" already exists`
         );
+
+        process.exitCode = 1;
+        return;
     }
 
     const username = await input({
@@ -50,14 +54,36 @@ export async function addCommand() {
             "Generating SSH key..."
         ).start();
 
-        sshKey = await generateSSHKey(
-            name,
-            email
-        );
+        try {
+            sshKey = await generateSSHKey(
+                name,
+                email
+            );
 
-        spinner.succeed(
-            "SSH key generated"
-        );
+            spinner.succeed(
+                "SSH key generated"
+            );
+        } catch (err) {
+            spinner.fail(
+                "Unable to generate SSH key"
+            );
+
+            error(
+                "Could not create SSH key. Ensure OpenSSH is installed and available."
+            );
+
+            if (
+                err &&
+                typeof err === "object" &&
+                "shortMessage" in err &&
+                err.shortMessage
+            ) {
+                error(String(err.shortMessage));
+            }
+
+            process.exitCode = 1;
+            return;
+        }
     }
 
     saveProfile({

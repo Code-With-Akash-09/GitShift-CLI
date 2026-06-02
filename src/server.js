@@ -3,7 +3,7 @@
 import axios from "axios";
 import chalk from "chalk";
 import { Command } from "commander";
-import packageJson from "../package.json" with { type: "json" };
+import { createRequire } from "node:module";
 import { addCommand } from "./commands/add.js";
 import { currentCommand } from "./commands/current.js";
 import { doctorCommand } from "./commands/doctor.js";
@@ -11,7 +11,8 @@ import { listCommand } from "./commands/list.js";
 import { removeCommand } from "./commands/remove.js";
 import { useCommand } from "./commands/use.js";
 
-const { name, version } = packageJson;
+const require = createRequire(import.meta.url);
+const { name, version } = require("../package.json");
 
 function printBanner() {
     const logo = String.raw`
