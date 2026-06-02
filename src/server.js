@@ -64,6 +64,7 @@ async function checkForUpdates() {
         }
     } catch (error) {
         // Ignore version check failures so the CLI still starts offline.
+        // intentionally ignore errors (network may be offline)
     }
 }
 
@@ -122,10 +123,28 @@ async function main() {
         )
         .action(doctorCommand);
 
-    await program.parseAsync(process.argv);
+    program.exitOverride();
+
+    try {
+        await program.parseAsync(process.argv);
+        process.exitCode = 0;
+    } catch (err) {
+        if (err && (err.name === "CommanderError" || err.code === "outputHelp")) {
+            process.exitCode = 0;
+        } else {
+            throw err;
+        }
+    }
 }
 
 main().catch((error) => {
-    console.error(error);
-    process.exit(1);
+    if (error) {
+        if (error.stack) {
+            console.error(error.stack);
+        } else {
+            console.error(error);
+        }
+
+        process.exit(1);
+    }
 });
