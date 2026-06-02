@@ -1,7 +1,7 @@
 import Conf from "conf";
 
 const config = new Conf({
-    projectName: "ghswitch",
+    projectName: "gitshift",
 });
 
 export function getProfiles() {

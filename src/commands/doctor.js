@@ -34,11 +34,19 @@ export async function doctorCommand() {
         "-V",
     ]);
 
-    await check(
+    const ghInstalled = await check(
         "GitHub CLI",
         "gh",
         ["--version"]
     );
+
+    if (!ghInstalled) {
+        console.log();
+        console.log(
+            "Hint: Install GitHub CLI (macOS): `brew install gh`"
+        );
+        console.log("Then authenticate with: `gh auth login`");
+    }
 
     console.log();
 }

@@ -24,7 +24,7 @@ export async function generateSSHKey(
     const keyPath = path.join(
         os.homedir(),
         ".ssh",
-        `ghswitch-${safeProfileName}`
+        `gitshift-${safeProfileName}`
     );
 
     const exists = await fs.pathExists(
