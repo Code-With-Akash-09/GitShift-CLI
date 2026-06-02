@@ -6,6 +6,7 @@ import {
 import ora from "ora";
 
 import {
+    getProfile,
     saveProfile,
 } from "../services/profile.js";
 
@@ -21,6 +22,12 @@ export async function addCommand() {
     const name = await input({
         message: "Profile Name",
     });
+
+    if (getProfile(name)) {
+        throw new Error(
+            `Profile "${name}" already exists`
+        );
+    }
 
     const username = await input({
         message: "GitHub Username",
@@ -61,6 +68,6 @@ export async function addCommand() {
     });
 
     success(
-        `Profile "${name}" created`
+        `Profile "${name}" saved locally`
     );
 }

@@ -1,69 +1,130 @@
 #!/usr/bin/env node
 
+import axios from "axios";
+import chalk from "chalk";
 import { Command } from "commander";
-
+import packageJson from "../package.json" with { type: "json" };
 import { addCommand } from "./commands/add.js";
-
-import { listCommand } from "./commands/list.js";
-
 import { currentCommand } from "./commands/current.js";
-
+import { doctorCommand } from "./commands/doctor.js";
+import { listCommand } from "./commands/list.js";
+import { removeCommand } from "./commands/remove.js";
 import { useCommand } from "./commands/use.js";
 
-import { removeCommand } from "./commands/remove.js";
+const { name, version } = packageJson;
 
-import { doctorCommand } from "./commands/doctor.js";
+function printBanner() {
+    const logo = String.raw`
+  ██████╗ ██╗████████╗███████╗██╗  ██╗██╗███████╗████████╗
+ ██╔════╝ ██║╚══██╔══╝██╔════╝██║  ██║██║██╔════╝╚══██╔══╝
+ ██║  ███╗██║   ██║   ███████╗███████║██║█████╗     ██║
+ ██║   ██║██║   ██║   ╚════██║██╔══██║██║██╔══╝     ██║
+ ╚██████╔╝██║   ██║   ███████║██║  ██║██║██║        ██║
+  ╚═════╝ ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝╚═╝        ╚═╝
+`;
+    console.log(chalk.cyanBright(logo));
+    console.log(chalk.bold("GitShift CLI"));
+    console.log(
+        chalk.dim("Manage and switch GitHub accounts effortlessly\n")
+    );
+}
 
-const program =
-    new Command();
+function compareVersions(currentVersion, latestVersion) {
+    const currentParts = currentVersion.split(".").map(Number);
+    const latestParts = latestVersion.split(".").map(Number);
 
-program
-    .name("gitshift")
-    .description(
-        "GitHub Account Switcher"
-    )
-    .version("1.0.0");
+    for (let index = 0; index < 3; index += 1) {
+        const currentPart = currentParts[index] || 0;
+        const latestPart = latestParts[index] || 0;
 
-program
-    .command("add")
-    .description(
-        "Create profile"
-    )
-    .action(addCommand);
+        if (currentPart > latestPart) return 1;
+        if (currentPart < latestPart) return -1;
+    }
 
-program
-    .command("list")
-    .description(
-        "List profiles"
-    )
-    .action(listCommand);
+    return 0;
+}
 
-program
-    .command("current")
-    .description(
-        "Show active profile"
-    )
-    .action(currentCommand);
+async function checkForUpdates() {
+    try {
+        const response = await axios.get(
+            `https://registry.npmjs.org/${name}/latest`,
+            {
+                timeout: 3000,
+            },
+        );
 
-program
-    .command("use <profile>")
-    .description(
-        "Switch profile"
-    )
-    .action(useCommand);
+        const latestVersion = response.data.version;
 
-program
-    .command("remove <profile>")
-    .description(
-        "Delete profile"
-    )
-    .action(removeCommand);
+        if (latestVersion && compareVersions(version, latestVersion) < 0) {
+            console.log(
+                `A new version of ${name} is available: ${version} -> ${latestVersion}`,
+            );
+            console.log(`Run: npm install -g ${name}`);
+        }
+    } catch (error) {
+        // Ignore version check failures so the CLI still starts offline.
+    }
+}
 
-program
-    .command("doctor")
-    .description(
-        "System health check"
-    )
-    .action(doctorCommand);
+async function main() {
+    printBanner();
+    await checkForUpdates();
 
-program.parse();
+    const program = new Command();
+
+    program
+        .name("gitshift")
+        .description(
+            "GitHub Account Switcher"
+        )
+        .version(version);
+
+    program
+        .command("add")
+        .description(
+            "Create local profile"
+        )
+        .action(addCommand);
+
+    program
+        .command("list")
+        .description(
+            "List profiles"
+        )
+        .action(listCommand);
+
+    program
+        .command("current")
+        .description(
+            "Show active profile"
+        )
+        .action(currentCommand);
+
+    program
+        .command("use <profile>")
+        .description(
+            "Switch profile and update git config"
+        )
+        .action(useCommand);
+
+    program
+        .command("remove <profile>")
+        .description(
+            "Delete profile"
+        )
+        .action(removeCommand);
+
+    program
+        .command("doctor")
+        .description(
+            "System health check"
+        )
+        .action(doctorCommand);
+
+    await program.parseAsync(process.argv);
+}
+
+main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});
