@@ -1,6 +1,6 @@
 {
   "name": "gitshift",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "GitHub Account Switcher CLI",
   "main": "server.js",
   "bin": {
