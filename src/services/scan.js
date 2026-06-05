@@ -5,9 +5,7 @@ import path from "path";
 
 export async function findSSHKeys() {
     const sshDir = path.join(os.homedir(), ".ssh");
-
-    const exists =
-        await fs.pathExists(sshDir);
+    const exists = await fs.pathExists(sshDir);
 
     if (!exists) {
         return [];

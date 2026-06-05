@@ -62,9 +62,7 @@ async function checkForUpdates() {
         const latestVersion = response.data.version;
 
         if (latestVersion && compareVersions(version, latestVersion) < 0) {
-            console.log(
-                `A new version of ${name} is available: ${version} -> ${latestVersion}`,
-            );
+            console.log(`A new version of ${name} is available: ${version} -> ${latestVersion}`);
             console.log(`Run: npm install -g ${name}`);
         }
     } catch (error) {

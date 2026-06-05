@@ -1,24 +1,8 @@
+import { input, select } from "@inquirer/prompts";
 import path from "path";
-
-import {
-    input,
-    select,
-} from "@inquirer/prompts";
-
-import {
-    findSSHKeys,
-} from "../services/scan.js";
-
-import {
-    getProfiles,
-    saveProfile,
-} from "../services/profile.js";
-
-import {
-    error,
-    info,
-    success,
-} from "../utils/logger.js";
+import { getProfiles, saveProfile } from "../services/profile.js";
+import { findSSHKeys } from "../services/scan.js";
+import { error, info, success } from "../utils/logger.js";
 
 export async function scanCommand() {
     try {
@@ -30,9 +14,7 @@ export async function scanCommand() {
         }
 
         const existing = getProfiles();
-
         const importedPaths = existing.map((profile) => profile.sshKey);
-
         const available = keys.filter((key) => !importedPaths.includes(key));
 
         if (!available.length) {
@@ -57,9 +39,17 @@ export async function scanCommand() {
             message: "GitHub Username",
         });
 
+        if (!username.trim()) {
+            throw new Error("GitHub username is required");
+        }
+
         const email = await input({
             message: "Email",
         });
+
+        if (!email.trim()) {
+            throw new Error("Email is required");
+        }
 
         try {
             saveProfile({
@@ -67,8 +57,7 @@ export async function scanCommand() {
                 username,
                 email,
                 sshKey: selected,
-                source:
-                    "imported",
+                source: "imported",
             });
 
             success(`Existing SSH Key Imported "${profileName}"`);

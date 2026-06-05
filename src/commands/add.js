@@ -1,29 +1,20 @@
-import {
-    confirm,
-    input,
-} from "@inquirer/prompts";
-
+import { confirm, input } from "@inquirer/prompts";
 import ora from "ora";
-
-import {
-    getProfile,
-    saveProfile,
-} from "../services/profile.js";
-
-import {
-    generateSSHKey,
-} from "../services/ssh.js";
-
-import {
-    error,
-    success,
-} from "../utils/logger.js";
+import { getProfile, saveProfile } from "../services/profile.js";
+import { generateSSHKey } from "../services/ssh.js";
+import { error, success } from "../utils/logger.js";
 
 export async function addCommand() {
     try {
         const name = await input({
             message: "Profile Name",
         });
+
+        if (!name.trim()) {
+            throw new Error(
+                "Profile name is required"
+            );
+        }
 
         if (getProfile(name)) {
             error(`Profile "${name}" already exists`);
@@ -36,9 +27,21 @@ export async function addCommand() {
             message: "GitHub Username",
         });
 
+        if (!username.trim()) {
+            throw new Error(
+                "GitHub username is required"
+            );
+        }
+
         const email = await input({
             message: "Email",
         });
+
+        if (!email.trim()) {
+            throw new Error(
+                "Email is required"
+            );
+        }
 
         const createSSH = await confirm({
             message: "Generate SSH key automatically?",
@@ -80,9 +83,7 @@ export async function addCommand() {
             sshKey,
         });
 
-        success(
-            `Profile "${name}" saved locally`
-        );
+        success(`Profile "${name}" saved locally`);
     } catch (err) {
         if (err && err.name === "ExitPromptError") {
             // User canceled the prompt (Ctrl+C / SIGINT). Exit gracefully.

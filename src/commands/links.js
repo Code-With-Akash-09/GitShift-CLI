@@ -1,6 +1,4 @@
-import {
-    getFolderMappings,
-} from "../services/profile.js";
+import { getFolderMappings } from "../services/profile.js";
 
 export async function linksCommand() {
     const mappings = getFolderMappings();

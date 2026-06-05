@@ -1,9 +1,6 @@
 import { execa } from "execa";
 
-export async function setGitUser(
-    name,
-    email
-) {
+export async function setGitUser(name, email) {
     await execa("git", [
         "config",
         "--global",

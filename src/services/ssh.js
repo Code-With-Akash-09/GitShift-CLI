@@ -13,32 +13,21 @@ function toSafeKeyName(profileName) {
     return normalized || "profile";
 }
 
-export async function generateSSHKey(
-    profileName,
-    email
-) {
-    const safeProfileName = toSafeKeyName(
-        profileName
-    );
-
+export async function generateSSHKey(profileName, email) {
+    const safeProfileName = toSafeKeyName(profileName);
     const keyPath = path.join(
         os.homedir(),
         ".ssh",
         `gitshift-${safeProfileName}`
     );
 
-    const exists = await fs.pathExists(
-        keyPath
-    );
+    const exists = await fs.pathExists(keyPath);
 
     if (exists) {
         return keyPath;
     }
 
-    await fs.ensureDir(
-        path.dirname(keyPath)
-    );
-
+    await fs.ensureDir(path.dirname(keyPath));
     await execa("ssh-keygen", [
         "-t",
         "ed25519",
@@ -53,14 +42,9 @@ export async function generateSSHKey(
     return keyPath;
 }
 
-export async function getPublicKey(
-    privateKeyPath
-) {
-    const publicKey =
-        `${privateKeyPath}.pub`;
-
-    const exists =
-        await fs.pathExists(publicKey);
+export async function getPublicKey(privateKeyPath) {
+    const publicKey = `${privateKeyPath}.pub`;
+    const exists = await fs.pathExists(publicKey);
 
     if (!exists) {
         return null;

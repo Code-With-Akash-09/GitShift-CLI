@@ -9,20 +9,27 @@ export function getProfiles() {
 }
 
 export function saveProfile(profile) {
-    const profiles = getProfiles();
 
+    if (
+        !profile.name?.trim() ||
+        !profile.username?.trim() ||
+        !profile.email?.trim()
+    ) {
+        throw new Error(
+            "Invalid profile data"
+        );
+    }
+
+    const profiles = getProfiles();
     const exists = profiles.find(
         (item) => item.name === profile.name
     );
 
     if (exists) {
-        throw new Error(
-            `Profile "${profile.name}" already exists`
-        );
+        throw new Error(`Profile "${profile.name}" already exists`);
     }
 
     profiles.push(profile);
-
     config.set("profiles", profiles);
 }
 
@@ -44,9 +51,7 @@ export function removeProfile(name) {
     config.set("profiles", filtered);
 }
 
-export function setCurrentProfile(
-    name
-) {
+export function setCurrentProfile(name) {
     if (!name) {
         config.delete("current");
         return;
@@ -63,12 +68,8 @@ export function getFolderMappings() {
     return config.get("folderMappings", []);
 }
 
-export function addFolderMapping(
-    profile,
-    folderPath
-) {
+export function addFolderMapping(profile, folderPath) {
     const mappings = getFolderMappings();
-
     const exists = mappings.find((item) => item.path === folderPath);
 
     if (exists) {
@@ -76,20 +77,10 @@ export function addFolderMapping(
     }
 
     mappings.push({ profile, path: folderPath, });
-
     config.set("folderMappings", mappings);
 }
 
-export function removeFolderMapping(
-    folderPath
-) {
+export function removeFolderMapping(folderPath) {
     const mappings = getFolderMappings();
-
-    config.set(
-        "folderMappings",
-        mappings.filter(
-            (item) =>
-                item.path !== folderPath
-        )
-    );
+    config.set("folderMappings", mappings.filter((item) => item.path !== folderPath));
 }
