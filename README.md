@@ -40,6 +40,45 @@ gitshift --help
 - `gitshift scan` - Scan your `~/.ssh` folder and import existing SSH keys into new profiles.
 - `gitshift doctor` - Check whether Git, SSH, and GitHub CLI are installed.
 
+- `gitshift link <folder>` - Link a local folder to a profile (prompts to select or create a profile).
+- `gitshift unlink <folder>` - Remove an existing folder mapping.
+- `gitshift links` - List folder → profile mappings.
+- `gitshift auto` - Auto-switch profile based on the current working directory and configured folder mappings.
+
+### Add Command
+
+- **Interactive prompts**: `Profile Name`, `GitHub Username`, `Email` (all required).
+- **SSH key generation**: prompts `Generate SSH key automatically?` (default: **yes**). If accepted, an SSH key is generated and saved under `~/.ssh` with the pattern `gitshift-<profile-name>`.
+- **Validation**: profile names must be unique; empty values for name, username, or email are rejected.
+- **Cancelation**: pressing Ctrl+C during prompts exits gracefully and cancels creation.
+
+### Folder mappings
+
+- `gitshift link <folder>`: associates a local folder path with a profile. If no profiles exist, you'll be prompted to create one; otherwise you can pick an existing profile or create a new one. Linking stores an absolute path mapping so GitShift can detect and switch profiles when you `cd` into that folder.
+- `gitshift unlink <folder>`: removes the mapping for the given folder path.
+- `gitshift links`: prints all configured folder mappings in the form `profile → /absolute/path`.
+
+Example linking a folder
+
+```bash
+$ gitshift link ~/projects/my-repo
+Select Profile: personal
+Linked /Users/akashs/projects/my-repo
+Profile: personal
+```
+
+### Auto switching
+
+- `gitshift auto` checks the current working directory against your configured folder mappings. If a matching mapping is found, GitShift will set the Git user (`user.name` and `user.email`) and mark the matched profile as current.
+
+Run `gitshift auto` inside a linked folder (or any child path) to switch automatically:
+
+```bash
+$ cd ~/projects/my-repo
+$ gitshift auto
+Switched to personal
+```
+
 ## Example Workflow
 
 ```bash
@@ -54,6 +93,16 @@ gitshift doctor
 When you create a profile and choose SSH generation, GitShift creates a key under your home directory in `.ssh` using the pattern `gitshift-<profile-name>`.
 
 If you already have SSH keys on your machine, `gitshift scan` will list the available keys, let you pick one, and save it as a new imported profile.
+
+Interactive `add` example
+
+```bash
+$ gitshift add
+Profile Name: personal
+GitHub Username: akash
+Email: akash@example.com
+Generate SSH key automatically? (Y/n) [Y]
+```
 
 ## How It Works
 
