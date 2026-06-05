@@ -52,3 +52,22 @@ export async function generateSSHKey(
 
     return keyPath;
 }
+
+export async function getPublicKey(
+    privateKeyPath
+) {
+    const publicKey =
+        `${privateKeyPath}.pub`;
+
+    const exists =
+        await fs.pathExists(publicKey);
+
+    if (!exists) {
+        return null;
+    }
+
+    return fs.readFile(
+        publicKey,
+        "utf8"
+    );
+}

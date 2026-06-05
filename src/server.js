@@ -9,6 +9,7 @@ import { currentCommand } from "./commands/current.js";
 import { doctorCommand } from "./commands/doctor.js";
 import { listCommand } from "./commands/list.js";
 import { removeCommand } from "./commands/remove.js";
+import { scanCommand } from "./commands/scan.js";
 import { useCommand } from "./commands/use.js";
 
 const require = createRequire(import.meta.url);
@@ -115,6 +116,13 @@ async function main() {
             "Delete profile"
         )
         .action(removeCommand);
+
+    program
+        .command("scan")
+        .description(
+            "Import existing SSH keys"
+        )
+        .action(scanCommand);
 
     program
         .command("doctor")
