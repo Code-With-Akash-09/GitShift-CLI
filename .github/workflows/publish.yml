@@ -8,7 +8,7 @@ on:
       - package.json
       - package-lock.json
       - src/**
-      - .github/workflows/publish-root.yml
+      - .github/workflows/publish.yml
 
 jobs:
   publish:

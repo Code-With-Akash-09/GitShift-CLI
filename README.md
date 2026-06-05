@@ -1,6 +1,6 @@
 # GitShift CLI
 
-GitShift CLI helps you create, manage, and switch between GitHub identity profiles from the terminal. It stores profiles locally, updates your global Git config, and can generate SSH keys for each profile when needed.
+GitShift CLI helps you create, manage, and switch between GitHub identity profiles from the terminal. It stores profiles locally, updates your global Git config, can generate SSH keys for each profile when needed, and can import existing SSH keys from your `~/.ssh` folder.
 
 ## Installation
 
@@ -37,6 +37,7 @@ gitshift --help
 - `gitshift current` - Display the active profile.
 - `gitshift use <profile>` - Switch to a saved profile and update global Git user name and email.
 - `gitshift remove <profile>` - Delete a saved profile.
+- `gitshift scan` - Scan your `~/.ssh` folder and import existing SSH keys into new profiles.
 - `gitshift doctor` - Check whether Git, SSH, and GitHub CLI are installed.
 
 ## Example Workflow
@@ -44,12 +45,15 @@ gitshift --help
 ```bash
 gitshift add
 gitshift list
+gitshift scan
 gitshift use personal
 gitshift current
 gitshift doctor
 ```
 
 When you create a profile and choose SSH generation, GitShift creates a key under your home directory in `.ssh` using the pattern `gitshift-<profile-name>`.
+
+If you already have SSH keys on your machine, `gitshift scan` will list the available keys, let you pick one, and save it as a new imported profile.
 
 ## How It Works
 
