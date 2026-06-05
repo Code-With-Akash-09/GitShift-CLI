@@ -26,9 +26,7 @@ export async function addCommand() {
         });
 
         if (getProfile(name)) {
-            error(
-                `Profile "${name}" already exists`
-            );
+            error(`Profile "${name}" already exists`);
 
             process.exitCode = 1;
             return;
@@ -43,35 +41,23 @@ export async function addCommand() {
         });
 
         const createSSH = await confirm({
-            message:
-                "Generate SSH key automatically?",
+            message: "Generate SSH key automatically?",
             default: true,
         });
 
         let sshKey = null;
 
         if (createSSH) {
-            const spinner = ora(
-                "Generating SSH key..."
-            ).start();
+            const spinner = ora("Generating SSH key...").start();
 
             try {
-                sshKey = await generateSSHKey(
-                    name,
-                    email
-                );
+                sshKey = await generateSSHKey(name, email);
 
-                spinner.succeed(
-                    "SSH key generated"
-                );
+                spinner.succeed("SSH key generated");
             } catch (err) {
-                spinner.fail(
-                    "Unable to generate SSH key"
-                );
+                spinner.fail("Unable to generate SSH key");
 
-                error(
-                    "Could not create SSH key. Ensure OpenSSH is installed and available."
-                );
+                error("Could not create SSH key. Ensure OpenSSH is installed and available.");
 
                 if (
                     err &&
@@ -100,6 +86,7 @@ export async function addCommand() {
     } catch (err) {
         if (err && err.name === "ExitPromptError") {
             // User canceled the prompt (Ctrl+C / SIGINT). Exit gracefully.
+            error("Profile creation canceled.");
             process.exitCode = 0;
             return;
         }
