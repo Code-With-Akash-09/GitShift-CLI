@@ -58,3 +58,38 @@ export function setCurrentProfile(
 export function getCurrentProfile() {
     return config.get("current", null);
 }
+
+export function getFolderMappings() {
+    return config.get("folderMappings", []);
+}
+
+export function addFolderMapping(
+    profile,
+    folderPath
+) {
+    const mappings = getFolderMappings();
+
+    const exists = mappings.find((item) => item.path === folderPath);
+
+    if (exists) {
+        throw new Error("Folder already mapped");
+    }
+
+    mappings.push({ profile, path: folderPath, });
+
+    config.set("folderMappings", mappings);
+}
+
+export function removeFolderMapping(
+    folderPath
+) {
+    const mappings = getFolderMappings();
+
+    config.set(
+        "folderMappings",
+        mappings.filter(
+            (item) =>
+                item.path !== folderPath
+        )
+    );
+}

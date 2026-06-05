@@ -5,11 +5,15 @@ import chalk from "chalk";
 import { Command } from "commander";
 import { createRequire } from "node:module";
 import { addCommand } from "./commands/add.js";
+import { autoCommand } from "./commands/auto.js";
 import { currentCommand } from "./commands/current.js";
 import { doctorCommand } from "./commands/doctor.js";
+import { linkCommand } from "./commands/link.js";
+import { linksCommand } from "./commands/links.js";
 import { listCommand } from "./commands/list.js";
 import { removeCommand } from "./commands/remove.js";
 import { scanCommand } from "./commands/scan.js";
+import { unlinkCommand } from "./commands/unlink.js";
 import { useCommand } from "./commands/use.js";
 
 const require = createRequire(import.meta.url);
@@ -113,7 +117,7 @@ async function main() {
     program
         .command("remove <profile>")
         .description(
-            "Delete profile"
+            "Remove profile"
         )
         .action(removeCommand);
 
@@ -123,6 +127,36 @@ async function main() {
             "Import existing SSH keys"
         )
         .action(scanCommand);
+
+    program
+        .command(
+            "link <folder>"
+        )
+        .description(
+            "Link folder to profile"
+        )
+        .action(linkCommand);
+
+    program
+        .command("unlink <folder>")
+        .description(
+            "Remove folder mapping"
+        )
+        .action(unlinkCommand);
+
+    program
+        .command("links")
+        .description(
+            "List folder mappings"
+        )
+        .action(linksCommand);
+
+    program
+        .command("auto")
+        .description(
+            "Auto switch profile"
+        )
+        .action(autoCommand);
 
     program
         .command("doctor")
