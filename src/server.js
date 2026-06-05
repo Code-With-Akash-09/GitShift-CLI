@@ -6,12 +6,14 @@ import { Command } from "commander";
 import { createRequire } from "node:module";
 import { addCommand } from "./commands/add.js";
 import { autoCommand } from "./commands/auto.js";
+import { backupCommand } from "./commands/backup.js";
 import { currentCommand } from "./commands/current.js";
 import { doctorCommand } from "./commands/doctor.js";
 import { linkCommand } from "./commands/link.js";
 import { linksCommand } from "./commands/links.js";
 import { listCommand } from "./commands/list.js";
 import { removeCommand } from "./commands/remove.js";
+import { restoreCommand } from "./commands/restore.js";
 import { scanCommand } from "./commands/scan.js";
 import { unlinkCommand } from "./commands/unlink.js";
 import { useCommand } from "./commands/use.js";
@@ -162,6 +164,22 @@ async function main() {
             "System health check"
         )
         .action(doctorCommand);
+
+    program
+        .command("backup")
+        .description(
+            "Backup profiles and mappings"
+        )
+        .argument("[file]")
+        .action(backupCommand);
+
+    program
+        .command("restore")
+        .description(
+            "Restore backup"
+        )
+        .argument("<file>")
+        .action(restoreCommand);
 
     program.exitOverride();
 

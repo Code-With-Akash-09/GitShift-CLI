@@ -84,3 +84,13 @@ export function removeFolderMapping(folderPath) {
     const mappings = getFolderMappings();
     config.set("folderMappings", mappings.filter((item) => item.path !== folderPath));
 }
+
+export function restoreData(data) {
+
+    config.set("profiles", data.profiles || []);
+    config.set("folderMappings", data.folderMappings || []);
+
+    if (data.currentProfile) {
+        config.set("current", data.currentProfile);
+    }
+}

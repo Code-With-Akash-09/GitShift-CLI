@@ -39,6 +39,8 @@ gitshift --help
 - `gitshift remove <profile>` - Delete a saved profile.
 - `gitshift scan` - Scan your `~/.ssh` folder and import existing SSH keys into new profiles.
 - `gitshift doctor` - Check whether Git, SSH, and GitHub CLI are installed.
+ - `gitshift backup [file]` - Export profiles, folder mappings, and current profile to a JSON backup file (default: `gitshift-backup.json`).
+ - `gitshift restore <file>` - Restore profiles and mappings from a previously created backup JSON file (prompts to confirm overwrite).
 
 - `gitshift link <folder>` - Link a local folder to a profile (prompts to select or create a profile).
 - `gitshift unlink <folder>` - Remove an existing folder mapping.
@@ -85,6 +87,7 @@ Switched to personal
 gitshift add
 gitshift list
 gitshift scan
+gitshift backup
 gitshift use personal
 gitshift current
 gitshift doctor
@@ -102,6 +105,27 @@ Profile Name: personal
 GitHub Username: akash
 Email: akash@example.com
 Generate SSH key automatically? (Y/n) [Y]
+```
+
+### Backup & Restore
+
+- `gitshift backup [file]` writes a JSON file containing your saved profiles, folder mappings, and the currently selected profile. If no file is provided it defaults to `gitshift-backup.json` in your current directory.
+
+Example backup:
+
+```bash
+$ gitshift backup
+Backup saved to /Users/akashs/gitshift-backup.json
+```
+
+- `gitshift restore <file>` reads the JSON backup and restores profiles and mappings. It prompts to confirm overwriting existing data.
+
+Example restore:
+
+```bash
+$ gitshift restore gitshift-backup.json
+This will overwrite current data. Continue? (y/N)
+Backup restored
 ```
 
 ## How It Works
