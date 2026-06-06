@@ -16,6 +16,7 @@ import { removeCommand } from "./commands/remove.js";
 import { restoreCommand } from "./commands/restore.js";
 import { scanCommand } from "./commands/scan.js";
 import { unlinkCommand } from "./commands/unlink.js";
+import { updateCommand } from "./commands/update.js";
 import { useCommand } from "./commands/use.js";
 
 const require = createRequire(import.meta.url);
@@ -180,6 +181,20 @@ async function main() {
         )
         .argument("<file>")
         .action(restoreCommand);
+    program
+        .command("update")
+        .description(
+            "Update GitShift"
+        )
+        .option(
+            "--enable-auto",
+            "Enable automatic update checks"
+        )
+        .option(
+            "--disable-auto",
+            "Disable automatic update checks"
+        )
+        .action(updateCommand);
 
     program.exitOverride();
 

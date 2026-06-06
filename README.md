@@ -41,6 +41,7 @@ gitshift --help
 - `gitshift doctor` - Check whether Git, SSH, and GitHub CLI are installed.
  - `gitshift backup [file]` - Export profiles, folder mappings, and current profile to a JSON backup file (default: `gitshift-backup.json`).
  - `gitshift restore <file>` - Restore profiles and mappings from a previously created backup JSON file (prompts to confirm overwrite).
+ - `gitshift update` - Update GitShift to the latest version or manage automatic update checks.
 
 - `gitshift link <folder>` - Link a local folder to a profile (prompts to select or create a profile).
 - `gitshift unlink <folder>` - Remove an existing folder mapping.
@@ -126,6 +127,26 @@ Example restore:
 $ gitshift restore gitshift-backup.json
 This will overwrite current data. Continue? (y/N)
 Backup restored
+```
+
+### Update Command
+
+- `gitshift update` updates GitShift to the latest published version (runs `npm install -g gitshift@latest`).
+- Options:
+	- `--enable-auto` — enable automatic update checks.
+	- `--disable-auto` — disable automatic update checks.
+
+Examples:
+
+```bash
+# Update GitShift to latest
+$ gitshift update
+
+# Enable automatic update checks
+$ gitshift update --enable-auto
+
+# Disable automatic update checks
+$ gitshift update --disable-auto
 ```
 
 ## How It Works

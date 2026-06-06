@@ -94,3 +94,19 @@ export function restoreData(data) {
         config.set("current", data.currentProfile);
     }
 }
+
+export function getSettings() {
+    return config.get("settings", {
+        autoUpdate: false,
+        lastUpdateCheck: null,
+    });
+}
+
+export function updateSettings(settings) {
+    const current = getSettings();
+
+    config.set("settings", {
+        ...current,
+        ...settings,
+    });
+}
