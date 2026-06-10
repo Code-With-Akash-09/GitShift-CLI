@@ -4,7 +4,7 @@ import { getProfile, setCurrentProfile } from "../services/profile.js";
 import { error, success } from "../utils/logger.js";
 
 export async function useCommand(profileName) {
-    const profile = getProfile(profileName);
+    const profile = getProfile("name", profileName);
 
     if (!profile) {
         error(`Profile "${profileName}" not found`);

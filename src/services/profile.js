@@ -4,6 +4,8 @@ const config = new Conf({
     projectName: "gitshift",
 });
 
+// Profiles
+
 export function getProfiles() {
     return config.get("profiles", []);
 }
@@ -33,11 +35,11 @@ export function saveProfile(profile) {
     config.set("profiles", profiles);
 }
 
-export function getProfile(name) {
+export function getProfile(field, value) {
     const profiles = getProfiles();
 
     return profiles.find(
-        (profile) => profile.name === name
+        (profile) => profile[field] === value
     );
 }
 
@@ -63,6 +65,8 @@ export function setCurrentProfile(name) {
 export function getCurrentProfile() {
     return config.get("current", null);
 }
+
+// Folder Mappings
 
 export function getFolderMappings() {
     return config.get("folderMappings", []);
@@ -94,6 +98,8 @@ export function restoreData(data) {
         config.set("current", data.currentProfile);
     }
 }
+
+// Settings
 
 export function getSettings() {
     return config.get("settings", {

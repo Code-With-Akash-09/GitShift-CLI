@@ -2,7 +2,7 @@ import { getCurrentProfile, getProfile, removeProfile, setCurrentProfile } from 
 import { error, success } from "../utils/logger.js";
 
 export async function removeCommand(profileName) {
-    const profile = getProfile(profileName);
+    const profile = getProfile("name", profileName);
 
     if (!profile) {
         error("Profile not found");

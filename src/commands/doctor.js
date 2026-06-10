@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import { execa } from "execa";
 import { error, success } from "../utils/logger.js";
 
@@ -13,7 +14,8 @@ async function check(name, command, args = []) {
 }
 
 export async function doctorCommand() {
-    console.log();
+
+    console.log(chalk.cyan("\nDoctor Check\n"));
 
     await check("Git", "git", ["--version",]);
     await check("SSH", "ssh", ["-V",]);
@@ -21,7 +23,6 @@ export async function doctorCommand() {
     const ghInstalled = await check("GitHub CLI", "gh", ["--version"]);
 
     if (!ghInstalled) {
-        console.log();
         console.log("Hint: Install GitHub CLI (macOS): `brew install gh`");
         console.log("Then authenticate with: `gh auth login`");
     }

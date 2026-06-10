@@ -1,11 +1,14 @@
 
+import chalk from "chalk";
 import { setGitUser } from "../services/git.js";
 import { getFolderMappings, getProfile, setCurrentProfile } from "../services/profile.js";
 import { success } from "../utils/logger.js";
 
 export async function autoCommand() {
-    const cwd = process.cwd();
 
+    console.log(chalk.cyan("\nAuto-switching Git user\n"));
+
+    const cwd = process.cwd();
     const mappings = getFolderMappings();
 
     const matched = mappings
@@ -25,7 +28,7 @@ export async function autoCommand() {
         return;
     }
 
-    const profile = getProfile(matched.profile);
+    const profile = getProfile("name", matched.profile);
 
     if (!profile) {
         return;
@@ -34,6 +37,5 @@ export async function autoCommand() {
     await setGitUser(profile.username, profile.email);
 
     setCurrentProfile(profile.name);
-
     success(`Switched to ${profile.name}`);
 }

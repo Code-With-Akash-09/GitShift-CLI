@@ -1,47 +1,36 @@
-import { confirm, input } from "@inquirer/prompts";
-import ora from "ora";
-import { getProfile, saveProfile } from "../services/profile.js";
-import { generateSSHKey } from "../services/ssh.js";
+import { confirm } from "@inquirer/prompts";
+import chalk from "chalk";
+import { saveProfile } from "../services/profile.js";
+import { createSSHKey, promptUniqueField } from "../utils/helper.js";
 import { error, success } from "../utils/logger.js";
 
 export async function addCommand() {
     try {
-        const name = await input({
-            message: "Profile Name",
+        console.log(chalk.cyan("\nCreate a new GitHub profile\n"));
+
+        const name = await promptUniqueField({
+            message: "Profile Name:",
+            field: "name",
+            requiredMessage: "Profile name is required",
+            duplicateMessage: (value) =>
+                `Profile "${value}" already exists`,
         });
 
-        if (!name.trim()) {
-            throw new Error(
-                "Profile name is required"
-            );
-        }
-
-        if (getProfile(name)) {
-            error(`Profile "${name}" already exists`);
-
-            process.exitCode = 1;
-            return;
-        }
-
-        const username = await input({
-            message: "GitHub Username",
+        const username = await promptUniqueField({
+            message: "GitHub Username:",
+            field: "username",
+            requiredMessage: "GitHub username is required",
+            duplicateMessage: (value) =>
+                `Username "${value}" already exists`,
         });
 
-        if (!username.trim()) {
-            throw new Error(
-                "GitHub username is required"
-            );
-        }
-
-        const email = await input({
-            message: "Email",
+        const email = await promptUniqueField({
+            message: "Email:",
+            field: "email",
+            requiredMessage: "Email is required",
+            duplicateMessage: (value) =>
+                `Email "${value}" already exists`,
         });
-
-        if (!email.trim()) {
-            throw new Error(
-                "Email is required"
-            );
-        }
 
         const createSSH = await confirm({
             message: "Generate SSH key automatically?",
@@ -51,29 +40,7 @@ export async function addCommand() {
         let sshKey = null;
 
         if (createSSH) {
-            const spinner = ora("Generating SSH key...").start();
-
-            try {
-                sshKey = await generateSSHKey(name, email);
-
-                spinner.succeed("SSH key generated");
-            } catch (err) {
-                spinner.fail("Unable to generate SSH key");
-
-                error("Could not create SSH key. Ensure OpenSSH is installed and available.");
-
-                if (
-                    err &&
-                    typeof err === "object" &&
-                    "shortMessage" in err &&
-                    err.shortMessage
-                ) {
-                    error(String(err.shortMessage));
-                }
-
-                process.exitCode = 1;
-                return;
-            }
+            sshKey = await createSSHKey(name, email);
         }
 
         saveProfile({
