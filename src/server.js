@@ -13,11 +13,13 @@ import { linkCommand } from "./commands/link.js";
 import { linksCommand } from "./commands/links.js";
 import { listCommand } from "./commands/list.js";
 import { removeCommand } from "./commands/remove.js";
+import { repairCommand } from "./commands/repair.js";
 import { restoreCommand } from "./commands/restore.js";
 import { scanCommand } from "./commands/scan.js";
 import { unlinkCommand } from "./commands/unlink.js";
 import { updateCommand } from "./commands/update.js";
 import { useCommand } from "./commands/use.js";
+import { verifyCommand } from "./commands/verify.js";
 
 const require = createRequire(import.meta.url);
 const { name, version } = require("../package.json");
@@ -195,6 +197,20 @@ async function main() {
             "Disable automatic update checks"
         )
         .action(updateCommand);
+
+    program
+        .command("verify")
+        .description(
+            "Verify repository authentication"
+        )
+        .action(verifyCommand);
+
+    program
+        .command("repair")
+        .description(
+            "Repair repository authentication"
+        )
+        .action(repairCommand);
 
     program.exitOverride();
 

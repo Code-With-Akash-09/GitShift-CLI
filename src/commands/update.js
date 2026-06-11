@@ -23,8 +23,7 @@ export async function updateCommand(options) {
     const spinner = ora("Updating GitShift...").start();
 
     try {
-        await execa(
-            "npm",
+        await execa("npm",
             [
                 "install",
                 "-g",

@@ -55,3 +55,47 @@ export async function getPublicKey(privateKeyPath) {
         "utf8"
     );
 }
+
+export async function addSSHHost(host, keyPath) {
+    const sshConfigPath = path.join(
+        os.homedir(),
+        ".ssh",
+        "config"
+    );
+
+    await fs.ensureFile(sshConfigPath);
+
+    let config = await fs.readFile(sshConfigPath, "utf8");
+
+    if (config.includes(`Host ${host}`)) {
+        return;
+    }
+
+    config += `
+Host ${host}
+    HostName github.com
+    User git
+    IdentityFile ${keyPath}
+    IdentitiesOnly yes
+`;
+
+    await fs.writeFile(sshConfigPath, config);
+}
+
+export async function verifySSHHost(host) {
+    try {
+        const { stderr } = await execa("ssh",
+            [
+                "-T",
+                host,
+            ],
+            {
+                reject: false,
+            }
+        );
+
+        return stderr || "";
+    } catch {
+        return "";
+    }
+}

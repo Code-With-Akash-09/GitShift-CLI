@@ -6,8 +6,32 @@ const config = new Conf({
 
 // Profiles
 
+export function buildSSHHost(name) {
+    return `github-${name
+        .toLowerCase()
+        .replace(
+            /[^a-z0-9]+/g,
+            "-"
+        )}`;
+}
+
 export function getProfiles() {
-    return config.get("profiles", []);
+    const profiles =
+        config.get(
+            "profiles",
+            []
+        );
+
+    return profiles.map(
+        (profile) => ({
+            ...profile,
+            sshHost:
+                profile.sshHost ||
+                buildSSHHost(
+                    profile.name
+                ),
+        })
+    );
 }
 
 export function saveProfile(profile) {
@@ -38,9 +62,22 @@ export function saveProfile(profile) {
 export function getProfile(field, value) {
     const profiles = getProfiles();
 
-    return profiles.find(
+    const profile = profiles.find(
         (profile) => profile[field] === value
     );
+
+    if (!profile) {
+        return null;
+    }
+
+    return {
+        ...profile,
+        sshHost:
+            profile.sshHost ||
+            buildSSHHost(
+                profile.name
+            ),
+    };
 }
 
 export function removeProfile(name) {

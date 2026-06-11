@@ -1,6 +1,7 @@
 import { confirm } from "@inquirer/prompts";
 import chalk from "chalk";
-import { saveProfile } from "../services/profile.js";
+import { buildSSHHost, saveProfile } from "../services/profile.js";
+import { addSSHHost } from "../services/ssh.js";
 import { createSSHKey, promptUniqueField } from "../utils/helper.js";
 import { error, success } from "../utils/logger.js";
 
@@ -41,6 +42,10 @@ export async function addCommand() {
 
         if (createSSH) {
             sshKey = await createSSHKey(name, email);
+            await addSSHHost(
+                buildSSHHost(name),
+                sshKey
+            );
         }
 
         saveProfile({
@@ -48,6 +53,8 @@ export async function addCommand() {
             username,
             email,
             sshKey,
+            sshHost: buildSSHHost(name),
+            source: "local",
         });
 
         success(`Profile "${name}" saved locally`);

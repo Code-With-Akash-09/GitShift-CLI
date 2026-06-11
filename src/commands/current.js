@@ -25,5 +25,6 @@ export async function currentCommand() {
     console.log(`Username : ${profile.username}`);
     console.log(`Email    : ${profile.email}`);
     console.log(`SSH Key  : ${profile.sshKey || "Not configured"}`);
+    console.log(`SSH Host : ${profile.sshHost || "Not configured"}`);
     console.log();
 }

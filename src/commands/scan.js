@@ -1,7 +1,7 @@
 import { select } from "@inquirer/prompts";
 import chalk from "chalk";
 import path from "path";
-import { getProfiles, saveProfile } from "../services/profile.js";
+import { buildSSHHost, getProfiles, saveProfile } from "../services/profile.js";
 import { findSSHKeys } from "../services/scan.js";
 import { promptUniqueField } from "../utils/helper.js";
 import { error, info, success } from "../utils/logger.js";
@@ -67,6 +67,7 @@ export async function scanCommand() {
             username,
             email,
             sshKey: selected,
+            sshHost: buildSSHHost(name),
             source: "imported",
         });
 
