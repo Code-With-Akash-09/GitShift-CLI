@@ -1,8 +1,7 @@
-import { getRemoteUrl, setRemoteUrl } from "../services/git.js";
+import { configureRepositoryAuth } from "../services/auth.js";
 import { buildSSHHost, getCurrentProfile, getProfile, getProfiles } from "../services/profile.js";
 import { addSSHHost } from "../services/ssh.js";
 import { error, success } from "../utils/logger.js";
-import { convertToSSHHost } from "../utils/remote.js";
 
 export async function repairCommand() {
     try {
@@ -29,34 +28,36 @@ export async function repairCommand() {
             );
         }
 
-        const cwd = process.cwd();
-        const host =
-            profile.sshHost ||
-            buildSSHHost(
-                profile.name
-            );
+        const authResult = await configureRepositoryAuth(profile);
 
-        await addSSHHost(host, profile.sshKey);
-
-        const remote = await getRemoteUrl(cwd);
-
-        if (remote.startsWith(`git@${host}:`)) {
+        if (authResult.status === "unchanged") {
             success("Repository already configured");
-            console.log(`\n${remote}\n`);
+            console.log(`\n${authResult.url}\n`);
             return;
         }
 
-        const sshRemote = convertToSSHHost(remote, host);
+        if (authResult.reason === "missing-ssh-key") {
+            error("No SSH key saved for the active profile");
+            return;
+        }
 
-        if (!sshRemote) {
+        if (authResult.reason === "not-git-repo") {
+            error("Current directory is not a Git repository");
+            return;
+        }
+
+        if (authResult.reason === "missing-remote") {
+            error("Repository has no origin remote");
+            return;
+        }
+
+        if (authResult.status === "skipped") {
             error("Unsupported remote");
             return;
         }
 
-        await setRemoteUrl(cwd, sshRemote);
-
         success("Remote repaired");
-        console.log(`\n${sshRemote}\n`);
+        console.log(`\n${authResult.url}\n`);
     } catch (err) {
         error(err.message);
     }

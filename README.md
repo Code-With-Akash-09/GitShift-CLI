@@ -35,7 +35,7 @@ gitshift --help
 - `gitshift add` - Create a new local profile. Prompts for profile name, GitHub username, email, and whether to generate an SSH key.
 - `gitshift list` - Show all saved profiles.
 - `gitshift current` - Display the active profile.
-- `gitshift use <profile>` - Switch to a saved profile and update global Git user name and email.
+- `gitshift use <profile>` - Switch to a saved profile, update Git user name and email, and align the current repository's GitHub SSH remote when possible.
 - `gitshift remove <profile>` - Delete a saved profile.
 - `gitshift scan` - Scan your `~/.ssh` folder and import existing SSH keys into new profiles.
 - `gitshift doctor` - Check whether Git, SSH, and GitHub CLI are installed.
@@ -72,7 +72,7 @@ Profile: personal
 
 ### Auto switching
 
-- `gitshift auto` checks the current working directory against your configured folder mappings. If a matching mapping is found, GitShift will set the Git user (`user.name` and `user.email`) and mark the matched profile as current.
+- `gitshift auto` checks the current working directory against your configured folder mappings. If a matching mapping is found, GitShift will set the Git user (`user.name` and `user.email`), align the current repository's GitHub SSH remote when possible, and mark the matched profile as current.
 
 Run `gitshift auto` inside a linked folder (or any child path) to switch automatically:
 
@@ -151,10 +151,12 @@ $ gitshift update --disable-auto
 
 ## How It Works
 
-Profiles are saved locally on your machine using the app's configuration store. Switching profiles updates your global Git identity with:
+Profiles are saved locally on your machine using the app's configuration store. Switching profiles updates your Git identity with:
 
 - `user.name`
 - `user.email`
+
+When you run `gitshift use <profile>` or `gitshift auto` inside a GitHub repository, GitShift also rewrites the `origin` remote to use that profile's SSH host if the profile has a saved SSH key. This keeps GitHub authentication aligned with the selected profile and avoids pushes using the previous account's credentials.
 
 ## Notes
 
@@ -165,4 +167,3 @@ Profiles are saved locally on your machine using the app's configuration store. 
 ## License
 
 ISC
-

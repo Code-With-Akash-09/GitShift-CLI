@@ -1,14 +1,20 @@
 export function convertToSSHHost(url, host) {
-    const httpsMatch = url.match(
+    const githubMatch = url.match(
         /github\.com[/:](.+?)\/(.+?)(\.git)?$/
     );
 
-    if (!httpsMatch) {
+    const sshMatch = url.match(
+        /^git@[^:]+:(.+?)\/(.+?)(\.git)?$/
+    );
+
+    const match = githubMatch || sshMatch;
+
+    if (!match) {
         return null;
     }
 
-    const owner = httpsMatch[1];
-    const repo = httpsMatch[2];
+    const owner = match[1];
+    const repo = match[2];
 
     return `git@${host}:${owner}/${repo}.git`;
 }

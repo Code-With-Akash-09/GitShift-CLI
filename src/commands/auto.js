@@ -1,5 +1,6 @@
 
 import chalk from "chalk";
+import { configureRepositoryAuth } from "../services/auth.js";
 import { setGitUser } from "../services/git.js";
 import { getFolderMappings, getProfile, setCurrentProfile } from "../services/profile.js";
 import { success } from "../utils/logger.js";
@@ -35,7 +36,13 @@ export async function autoCommand() {
     }
 
     await setGitUser(profile.username, profile.email);
+    const authResult = await configureRepositoryAuth(profile, cwd);
 
     setCurrentProfile(profile.name);
     success(`Switched to ${profile.name}`);
+
+    if (authResult.status === "changed") {
+        success("Repository authentication updated");
+        console.log(authResult.url);
+    }
 }
