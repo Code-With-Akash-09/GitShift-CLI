@@ -9,6 +9,7 @@ import { autoCommand } from "./commands/auto.js";
 import { backupCommand } from "./commands/backup.js";
 import { currentCommand } from "./commands/current.js";
 import { doctorCommand } from "./commands/doctor.js";
+import { installHooksCommand } from "./commands/install-hooks.js";
 import { linkCommand } from "./commands/link.js";
 import { linksCommand } from "./commands/links.js";
 import { listCommand } from "./commands/list.js";
@@ -32,12 +33,11 @@ function printBanner() {
      ██║   ██║██║   ██║   ╚════██║██╔══██║██║██╔══╝     ██║
      ╚██████╔╝██║   ██║   ███████║██║  ██║██║██║        ██║
       ╚═════╝ ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝╚═╝        ╚═╝
-    `;
+    
+GitShift CLI
+Manage and switch GitHub accounts effortlessly
+`;
     console.log(chalk.cyanBright(logo));
-    console.log(chalk.bold("GitShift CLI"));
-    console.log(
-        chalk.dim("Manage and switch GitHub accounts effortlessly\n")
-    );
 }
 
 function compareVersions(currentVersion, latestVersion) {
@@ -72,13 +72,16 @@ async function checkForUpdates() {
         }
     } catch (error) {
         // Ignore version check failures so the CLI still starts offline.
-        // intentionally ignore errors (network may be offline)
     }
 }
 
 async function main() {
-    printBanner();
-    await checkForUpdates();
+    const isSilent = process.argv.includes("--silent") || process.argv.includes("-s");
+
+    if (!isSilent) {
+        printBanner();
+        await checkForUpdates();
+    }
 
     const program = new Command();
 
@@ -157,9 +160,17 @@ async function main() {
     program
         .command("auto")
         .description(
-            "Auto switch profile"
+            "Auto switch profile based on folder"
         )
+        .option("-s, --silent", "Run silently without output")
         .action(autoCommand);
+
+    program
+        .command("install-hooks")
+        .description(
+            "Install shell hooks for automatic profile switching on directory change"
+        )
+        .action(installHooksCommand);
 
     program
         .command("doctor")
@@ -183,6 +194,7 @@ async function main() {
         )
         .argument("<file>")
         .action(restoreCommand);
+
     program
         .command("update")
         .description(

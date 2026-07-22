@@ -1,31 +1,31 @@
-
 import chalk from "chalk";
+import path from "path";
 import { configureRepositoryAuth } from "../services/auth.js";
 import { setGitUser } from "../services/git.js";
 import { getFolderMappings, getProfile, setCurrentProfile } from "../services/profile.js";
 import { success } from "../utils/logger.js";
 
-export async function autoCommand() {
+export async function autoCommand(options = {}) {
+    const isSilent = Boolean(options.silent);
 
-    console.log(chalk.cyan("\nAuto-switching Git user\n"));
+    if (!isSilent) {
+        console.log(chalk.cyan("\nAuto-switching Git user\n"));
+    }
 
-    const cwd = process.cwd();
+    const cwd = path.resolve(process.cwd());
     const mappings = getFolderMappings();
 
     const matched = mappings
-        .sort(
-            (a, b) =>
-                b.path.length -
-                a.path.length
-        )
-        .find((mapping) =>
-            cwd.startsWith(
-                mapping.path
-            )
-        );
+        .sort((a, b) => b.path.length - a.path.length)
+        .find((mapping) => {
+            const targetPath = path.resolve(mapping.path);
+            return cwd === targetPath || cwd.startsWith(targetPath + path.sep);
+        });
 
     if (!matched) {
-        console.log("\nNo matching profile\n");
+        if (!isSilent) {
+            console.log("\nNo matching profile for current folder\n");
+        }
         return;
     }
 
@@ -35,14 +35,23 @@ export async function autoCommand() {
         return;
     }
 
-    await setGitUser(profile.username, profile.email);
-    const authResult = await configureRepositoryAuth(profile, cwd);
+    try {
+        await setGitUser(profile.username, profile.email, cwd);
+        const authResult = await configureRepositoryAuth(profile, cwd);
 
-    setCurrentProfile(profile.name);
-    success(`Switched to ${profile.name}`);
+        setCurrentProfile(profile.name);
 
-    if (authResult.status === "changed") {
-        success("Repository authentication updated");
-        console.log(authResult.url);
+        if (!isSilent) {
+            success(`Switched to ${profile.name} (user: ${profile.username})`);
+
+            if (authResult.status === "changed") {
+                success("Repository authentication updated");
+                console.log(authResult.url);
+            }
+        }
+    } catch (err) {
+        if (!isSilent) {
+            console.error(chalk.red(`Failed auto switch: ${err.message}`));
+        }
     }
 }

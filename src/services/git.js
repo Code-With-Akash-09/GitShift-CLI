@@ -1,6 +1,6 @@
 import { execa } from "execa";
 
-export async function setGitUser(name, email, cwd) {
+export async function setGitUser(name, email, cwd = process.cwd()) {
     await execa("git",
         [
             "config",
@@ -20,7 +20,7 @@ export async function setGitUser(name, email, cwd) {
     );
 }
 
-export async function isGitRepo(cwd) {
+export async function isGitRepo(cwd = process.cwd()) {
     try {
         await execa("git",
             [
@@ -36,7 +36,7 @@ export async function isGitRepo(cwd) {
     }
 }
 
-export async function getRemoteUrl(cwd) {
+export async function getRemoteUrl(cwd = process.cwd()) {
     const { stdout } = await execa("git",
         [
             "remote",
@@ -49,7 +49,7 @@ export async function getRemoteUrl(cwd) {
     return stdout.trim();
 }
 
-export async function setRemoteUrl(cwd, url) {
+export async function setRemoteUrl(cwd = process.cwd(), url) {
     await execa("git",
         [
             "remote",

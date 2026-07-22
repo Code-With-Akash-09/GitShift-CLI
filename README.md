@@ -1,6 +1,6 @@
 # GitShift CLI
 
-GitShift CLI helps you create, manage, and switch between GitHub identity profiles from the terminal. It stores profiles locally, updates your global Git config, can generate SSH keys for each profile when needed, and can import existing SSH keys from your `~/.ssh` folder.
+GitShift CLI helps you create, manage, and switch between GitHub identity profiles from the terminal. It stores profiles locally, manages repository-local Git configs, automatically generates and uploads SSH keys to GitHub, and auto-switches your identity when you `cd` into linked project folders.
 
 ## Installation
 
@@ -22,7 +22,7 @@ GitShift expects the following tools to be available on your machine:
 - `git`
 - `ssh`
 - `ssh-keygen` for automatic SSH key generation
-- `gh` is recommended and checked by `gitshift doctor`
+- `gh` (GitHub CLI, recommended for one-click SSH key upload)
 
 ## Usage
 
@@ -32,137 +32,90 @@ gitshift --help
 
 ### Commands
 
-- `gitshift add` - Create a new local profile. Prompts for profile name, GitHub username, email, and whether to generate an SSH key.
+- `gitshift add` - Create a new local profile. Prompts for profile name, GitHub username, email, SSH key generation, and **automatic SSH key upload to GitHub**.
 - `gitshift list` - Show all saved profiles.
 - `gitshift current` - Display the active profile.
-- `gitshift use <profile>` - Switch to a saved profile, update Git user name and email, and align the current repository's GitHub SSH remote when possible.
+- `gitshift use <profile>` - Switch to a saved profile, update repository-local Git name/email, and configure the GitHub SSH remote.
 - `gitshift remove <profile>` - Delete a saved profile.
 - `gitshift scan` - Scan your `~/.ssh` folder and import existing SSH keys into new profiles.
+- `gitshift install-hooks` - **Automatically install shell hooks (`zsh` / `bash`) to enable seamless auto-switching on directory change (`cd`).**
 - `gitshift doctor` - Check whether Git, SSH, and GitHub CLI are installed.
- - `gitshift backup [file]` - Export profiles, folder mappings, and current profile to a JSON backup file (default: `gitshift-backup.json`).
- - `gitshift restore <file>` - Restore profiles and mappings from a previously created backup JSON file (prompts to confirm overwrite).
- - `gitshift update` - Update GitShift to the latest version or manage automatic update checks.
-
-- `gitshift link <folder>` - Link a local folder to a profile (prompts to select or create a profile).
+- `gitshift backup [file]` - Export profiles and folder mappings to a JSON backup file (default: `gitshift-backup.json`).
+- `gitshift restore <file>` - Restore profiles and mappings from a backup JSON file.
+- `gitshift update` - Update GitShift to the latest version or manage automatic update checks.
+- `gitshift link <folder>` - Link a local folder path to a profile.
 - `gitshift unlink <folder>` - Remove an existing folder mapping.
 - `gitshift links` - List folder → profile mappings.
-- `gitshift auto` - Auto-switch profile based on the current working directory and configured folder mappings.
+- `gitshift auto` - Auto-switch profile based on current working directory (`--silent` option available for shell hooks).
 
-### Add Command
+---
 
-- **Interactive prompts**: `Profile Name`, `GitHub Username`, `Email` (all required).
-- **SSH key generation**: prompts `Generate SSH key automatically?` (default: **yes**). If accepted, an SSH key is generated and saved under `~/.ssh` with the pattern `gitshift-<profile-name>`.
-- **Validation**: profile names must be unique; empty values for name, username, or email are rejected.
-- **Cancelation**: pressing Ctrl+C during prompts exits gracefully and cancels creation.
+### Add Command & Automatic Key Upload
 
-### Folder mappings
+- **Interactive prompts**: `Profile Name`, `GitHub Username`, `Email`.
+- **SSH key generation**: Prompts `Generate SSH key automatically?` (default: **yes**).
+- **Automatic GitHub Upload**:
+  - **Personal Access Token (PAT)**: Uploads the key directly via GitHub REST API using a token with `write:public_key` scope.
+  - **GitHub CLI (`gh`)**: Uploads the key using your logged-in `gh` CLI credentials.
+  - **Manual Upload**: Displays the public key if key upload is skipped.
+- **Verification**: Runs an immediate `ssh -T` test against GitHub to confirm authentication status.
 
-- `gitshift link <folder>`: associates a local folder path with a profile. If no profiles exist, you'll be prompted to create one; otherwise you can pick an existing profile or create a new one. Linking stores an absolute path mapping so GitShift can detect and switch profiles when you `cd` into that folder.
-- `gitshift unlink <folder>`: removes the mapping for the given folder path.
-- `gitshift links`: prints all configured folder mappings in the form `profile → /absolute/path`.
+---
 
-Example linking a folder
+### Folder Mappings & Automatic Switching
 
-```bash
-$ gitshift link ~/projects/my-repo
-Select Profile: personal
-Linked /Users/akashs/projects/my-repo
-Profile: personal
-```
+- `gitshift link <folder>`: Associates a directory path with a profile (e.g. `~/Developer/Personal`).
+- `gitshift install-hooks`: Installs a shell hook into your `~/.zshrc` or `~/.bashrc` file.
+- **Seamless Switching**: Navigating into any linked folder (or child repository) automatically updates your Git `user.name`, `user.email`, and SSH remote URL without requiring manual commands.
 
-### Auto switching
-
-- `gitshift auto` checks the current working directory against your configured folder mappings. If a matching mapping is found, GitShift will set the Git user (`user.name` and `user.email`), align the current repository's GitHub SSH remote when possible, and mark the matched profile as current.
-
-Run `gitshift auto` inside a linked folder (or any child path) to switch automatically:
+#### Setup Example
 
 ```bash
-$ cd ~/projects/my-repo
-$ gitshift auto
-Switched to personal
-```
-
-## Example Workflow
-
-```bash
+# 1. Add your profiles
 gitshift add
-gitshift list
-gitshift scan
-gitshift backup
-gitshift use personal
-gitshift current
-gitshift doctor
+
+# 2. Link directories
+gitshift link ~/Developer/Personal
+gitshift link ~/Developer/Office
+
+# 3. Install shell hooks
+gitshift install-hooks
+
+# Now changing directories automatically switches identities!
+cd ~/Developer/Office/api
 ```
 
-When you create a profile and choose SSH generation, GitShift creates a key under your home directory in `.ssh` using the pattern `gitshift-<profile-name>`.
+---
 
-If you already have SSH keys on your machine, `gitshift scan` will list the available keys, let you pick one, and save it as a new imported profile.
+### Auto Switching Command
 
-Interactive `add` example
+- `gitshift auto`: Checks current directory against folder mappings and switches profile.
+- `gitshift auto --silent` (or `-s`): Runs silently with zero output, designed for terminal hooks (`chpwd` / `PROMPT_COMMAND`).
 
-```bash
-$ gitshift add
-Profile Name: personal
-GitHub Username: akash
-Email: akash@example.com
-Generate SSH key automatically? (Y/n) [Y]
-```
+---
 
 ### Backup & Restore
 
-- `gitshift backup [file]` writes a JSON file containing your saved profiles, folder mappings, and the currently selected profile. If no file is provided it defaults to `gitshift-backup.json` in your current directory.
+- `gitshift backup [file]` writes a JSON file containing your saved profiles, folder mappings, and current selection.
+- `gitshift restore <file>` reads the JSON backup and restores profiles and mappings.
 
-Example backup:
-
-```bash
-$ gitshift backup
-Backup saved to /Users/akashs/gitshift-backup.json
-```
-
-- `gitshift restore <file>` reads the JSON backup and restores profiles and mappings. It prompts to confirm overwriting existing data.
-
-Example restore:
-
-```bash
-$ gitshift restore gitshift-backup.json
-This will overwrite current data. Continue? (y/N)
-Backup restored
-```
+---
 
 ### Update Command
 
-- `gitshift update` updates GitShift to the latest published version (runs `npm install -g gitshift@latest`).
-- Options:
-	- `--enable-auto` — enable automatic update checks.
-	- `--disable-auto` — disable automatic update checks.
+- `gitshift update` updates GitShift to the latest published version.
+- Options: `--enable-auto` / `--disable-auto`.
 
-Examples:
-
-```bash
-# Update GitShift to latest
-$ gitshift update
-
-# Enable automatic update checks
-$ gitshift update --enable-auto
-
-# Disable automatic update checks
-$ gitshift update --disable-auto
-```
+---
 
 ## How It Works
 
-Profiles are saved locally on your machine using the app's configuration store. Switching profiles updates your Git identity with:
+Profiles are saved locally using GitShift configuration. Switching profiles updates:
 
-- `user.name`
-- `user.email`
+1. **Git Identity**: `git config user.name` and `user.email` locally within the repository.
+2. **SSH Authentication**: Rewrites `origin` remote to use profile-specific host aliases (`git@github-<profile>:user/repo.git`), matching SSH keys configured in `~/.ssh/config`.
 
-When you run `gitshift use <profile>` or `gitshift auto` inside a GitHub repository, GitShift also rewrites the `origin` remote to use that profile's SSH host if the profile has a saved SSH key. This keeps GitHub authentication aligned with the selected profile and avoids pushes using the previous account's credentials.
-
-## Notes
-
-- Profile names must be unique.
-- `gitshift use <profile>` only switches to profiles that already exist locally.
-- If SSH key generation fails, make sure OpenSSH is installed and available in your shell.
+---
 
 ## License
 
